@@ -11,45 +11,32 @@ class Config(object):
     train = dict(
 
         data=dict(
-            data_path="data/01_raw/dfs.csv",
+            data_path="data/02_intermediate/dfs_merge.csv",
 
             # To list only needed features
             numeric_features=[
-                'sales_value_usd', 'sales_unit', 'original_price_usd',
-                'discount_amount_usd',
+                'sales_value_usd', 'original_price_usd',
+                'discount_amount_usd', 'sales_unit'
             ],
             category_features=[
-                'transaction_id', 'member_id_masked'
+                'transaction_id', 'member_id_masked',
+                'customer_type'
             ],
             datetime_features=[
                 'transaction_date'
             ],
-            features_to_drop_after_eda=[
-                'transaction_id', 'member_id_masked',
-                'transaction_date'
-            ]
         ),
 
         model={
-            PCA.__name__: [PCA(random_state=0), 0.8],  # alg, choose #components until explained var is larger
-            KMeans.__name__: [KMeans, np.arange(2, 10)]  # alg, number of clusters
+            # PCA.__name__: [PCA(random_state=0), 0.8],  # alg, #components until explained var is larger
+            KMeans.__name__: [KMeans, np.arange(2, 3)]  # alg, number of clusters
             # DBSCAN.__name__: DBSCAN(),
         },
 
-        tuning={
-            "tune": True,
-            "search_method": GridSearchCV,  # RandomizedSearchCV, BayesSearchCV
-            # PCA.__name__: dict(
-            #     pca__n_components=[2, 5],
-            #     ),
-            KMeans.__name__: dict(
-                model__n_clusters=[2, 5],
-                ),
-        },
-
         evaluation=[
-            silhouette_score,
-            dict(metric='euclidean', random_state=0)
+            silhouette_score,  # metric function
+            dict(metric='euclidean', random_state=0),  # metric parameters
+            True,  # Set True to indicate the higher the metrics the better the cluster is
             ],
 
         mlflow=dict(
@@ -69,7 +56,7 @@ class Config(object):
     # Prediction config
     predict = dict(
 
-        data_path="data/01_raw/housing.csv",
+        data_path="data/01_raw/dfs.csv",
 
         mlflow=dict(
             tracking_uri="http://127.0.0.1",
